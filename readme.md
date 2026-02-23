@@ -1,6 +1,6 @@
 # Podklady
 
-V tomto repozitáři jsou podklady pro projekt.
+V tomto repositáři jsou podklady pro projekt.
 
 ## Příklad
 
