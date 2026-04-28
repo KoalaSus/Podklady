@@ -6,8 +6,9 @@
 \usepackage{geometry}
 \geometry{margin=2.5cm}
 \usepackage[hidelinks]{hyperref}
+\usepackage{graphicx}
 
-% --- Titulní strana ---
+
 \title{
     \vspace{2cm}
     \Huge \textbf{3D Laserový Skener} \\
@@ -15,42 +16,34 @@
     \vspace{1cm}
     \large Technická dokumentace
 }
-\author{
-    \textbf{Autoři:} 
-}
+
  \date{\today}
+
 \begin{document}
 
 \maketitle
+\clearpage
 
+\setcounter{page}{2}
 \tableofcontents
+\clearpage
 
-\chapter{Úvod a cíle projektu}
+\chapter{Specifikace projektu}
 
+\chapter{Konstrukce a vývoj krabice}
 
-\chapter{Teoretický princip}
-
+\chapter{Tištěné specifické díly} % skeneru
 
 \chapter{Hardwarová část}
 \section{Seznam komponent}
-\section{Schéma zapojení}
-\section{Konstrukce a 3D tisk}
+\section{Diagram rozdělení skeneru}
+% HW -> RPI -> displej, webové rozhraní, skenovací SW
+\section{HW zapojení}
 
-\chapter{Softwarová část}
-\section{Zpracování obrazu}
-\section{Ovládání krokového motoru}
-\section{Ukládání dat}
-
-\chapter{Kalibrace a nastavení}
-
-
-\chapter{Uživatelská příručka}
-
+\chapter{Softwarová část a nastavení RPi}
+\section{Instalace OS a balíčků}
+\section{API skeneru}
 
 \chapter{Závěr a zhodnocení}
-
-
-\chapter{Přílohy}
-
 
 \end{document}
