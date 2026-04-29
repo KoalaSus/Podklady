@@ -32,6 +32,26 @@
 
 \chapter{Specifikace projektu}
 
+\chapter{Princip 3D skenování}
+
+Zařízení využívá metodu přímého laserového měření vzdálenosti v kombinaci s rotační kinematikou. Na rozdíl od triangulačních metod s kamerou je tento systém založen na sběru dat pomocí dedikovaných laserových senzorů typu ToF (\textit{Time-of-Flight}).
+
+\section{Metoda měření a konfigurace senzorů}
+Senzory pracují na principu měření doby letu světelného paprsku, což umožňuje přímý export distančních údajů v milimetrech. V konstrukci jsou využity dva snímače pro maximální pokrytí povrchu:
+
+\begin{itemize}
+    \item \textbf{Horizontální skener:} Fixován v boční pozici, snímá horizontální profil a členitost stěn objektu kolmo k ose rotace.
+    \item \textbf{Vertikální skener:} Umístěn v horní části konstrukce, mapuje výškové rozdíly a eliminuje slepá místa (stínění) bočního snímače.
+    \item \textbf{Datová fúze:} Díky fixní geometrii jsou skalární hodnoty ze snímačů softwarově transformovány na vektorové souřadnice v 3D prostoru.
+\end{itemize}
+
+\section{Tvorba mračna bodů}
+Pro dosažení 360° modelu je využito sekvenčního snímání synchronizovaného s pohybem podstavce.
+
+\begin{itemize}
+    \item \textbf{Polohování:} Krokový motor otáčí objektem v diskrétních úhlech. Po každém segmentu proběhne vyčtení dat z obou skenerů.
+    \item \textbf{Point Cloud:} Naměřená data jsou přepočítána do kartézské soustavy $[X, Y, Z]$. Výsledkem je mračno bodů reprezentující digitální otisk povrchu tělesa.
+\end{itemize}
 \chapter{Konstrukce a vývoj krabice}
 Krabice skeneru je navržena jako uzavřený box o vnějších rozměrech 24 × 18 × 15 cm. Tato velikost byla zvolena jako ideální kompromis mezi kompaktností a schopností skenovat objekty běžné velikosti (cca do 10 cm výšky). Konstrukce vychází z konceptu Raspberry Pi Laser Scanner [1], oproti kterému však bylo zvoleno robustnější řešení.\\\\
 Hlavním důvodem pro toto uzavřené řešení je zajištění stálých světelných podmínek uvnitř skeneru. Vnější světlo by mohlo negativně ovlivňovat přesnost laserových linií při snímání kamerou. Pevné stěny krabice navíc pomáhají tlumit vibrace od motoru, což zabraňuje rozmazání výsledného 3D modelu. Růžové body v modelu znázorňují pozice pro umístění skenovacích prvků.
@@ -107,13 +127,13 @@ Důležitou součástí jsou také krytky s vývody pro kabeláž, které slouž
 \FloatBarrier
 \section{Seznam komponent}
 \section{Schéma zapojení}
-\section{Diagram rozdělení skeneru}
-% HW -> RPI -> displej, webové rozhraní, skenovací SW
+
 
 
 \chapter{Softwarová část a nastavení RPi}
 \section{Instalace OS a balíčků}
 \section{API skeneru}
+
 
 \chapter{Závěr a zhodnocení}
 
