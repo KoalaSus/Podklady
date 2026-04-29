@@ -7,6 +7,8 @@
 \geometry{margin=2.5cm}
 \usepackage[hidelinks]{hyperref}
 \usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{placeins}
 
 
 \title{
@@ -35,30 +37,79 @@ Krabice skeneru je navržena jako uzavřený box o vnějších rozměrech 24 × 
 Hlavním důvodem pro toto uzavřené řešení je zajištění stálých světelných podmínek uvnitř skeneru. Vnější světlo by mohlo negativně ovlivňovat přesnost laserových linií při snímání kamerou. Pevné stěny krabice navíc pomáhají tlumit vibrace od motoru, což zabraňuje rozmazání výsledného 3D modelu. Růžové body v modelu znázorňují pozice pro umístění skenovacích prvků.
 \begin{figure}[h]
     \centering
-    % První obrázek (ten s rozměry)
-    \begin{minipage}{0.48\textwidth}
+   
+    \begin{subfigure}[t]{0.45\textwidth}
         \centering
 	\includegraphics[width=\textwidth]{img/krabice_rozmery.png} 
-        \caption{Technický nákres}
-    \end{minipage}
+        \caption{Čelní pohled}
+    \end{subfigure}
     \hfill
-% Druhý obrázek (perspektiva)
-    \begin{minipage}{0.48\textwidth}
+   \begin{subfigure}[t]{0.45\textwidth}
         \centering
         \includegraphics[width=\textwidth]{img/krabice_vnitrek.png}
         \caption{Perspektivní pohled}
-    \end{minipage}
+    \end{subfigure}
+\caption{Technické nákresy a vizualizace konstrukce krabice}
 \end{figure}
 
-\chapter{Tištěné specifické díly} % skeneru
-\section{Lasery}
-\section{Motor}
-
 \chapter{Hardwarová část}
+\section{Tištěné specifické díly}
+Jednotlivé mechanické díly byly navrženy s ohledem na přesné ustavení optických a pohonných prvků konstrukce. Držáky laserů a motoru zajišťují tuhost sestavy, která je klíčová pro eliminaci geometrických odchylek během rotace snímaného objektu. Rozměry a tvary těchto komponent byly optimalizovány pro technologii 3D tisku, čímž bylo dosaženo nízké hmotnosti, aniž by díly ztratily svou pevnost.\\\\
+Důležitou součástí jsou také krytky s vývody pro kabeláž, které slouží k organizaci vodičů a zabraňují jejich nechtěnému kontaktu s pohyblivými částmi skeneru. Variabilita v horizontálním a vertikálním provedení krytek umožňuje flexibilní vedení tras k řídicí jednotce bez nutnosti ostrých ohybů kabelů.
+\begin{figure}[h]
+    \centering
+    % 1. řada
+    \begin{subfigure}[t]{0.45\textwidth}
+        \centering
+        \includegraphics[height=4cm,keepaspectratio]{img/motor.png}
+        \caption{Držák krokového motoru}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.45\textwidth}
+        \centering
+        \includegraphics[height=4cm,keepaspectratio]{img/laser_hor.png}
+        \caption{Horizontální držák laseru}
+    \end{subfigure}
+	
+	\vspace{1.5em}
+
+    % 2. řada
+    \begin{subfigure}[t]{0.45\textwidth}
+        \centering
+        \includegraphics[height=4cm,keepaspectratio]{img/laser_ver.png}
+        \caption{Vertikální držák laseru}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.45\textwidth}
+        \centering
+        \includegraphics[height=4cm,keepaspectratio]{img/krytka_laser_hor.png}
+        \caption{Krytka laseru}
+    \end{subfigure}
+    \end{figure}
+  
+    \begin{figure}[h]
+ \ContinuedFloat
+    % 3. řada
+    \begin{subfigure}[t]{0.45\textwidth}
+        \centering
+        \includegraphics[height=4cm,keepaspectratio]{img/krytka_laser_hor_kabely.png}
+        \caption{Krytka s vývodem (horizontální)}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.45\textwidth}
+        \centering
+        \includegraphics[height=4cm,keepaspectratio]{img/krytka_laser_ver_kabely.png}
+        \caption{Krytka s vývodem (vertikální)}
+    \end{subfigure}
+    
+    \caption{Detailní přehled 3D modelů specifických dílů hardwaru.}
+\end{figure}
+\FloatBarrier
 \section{Seznam komponent}
+\section{Schéma zapojení}
 \section{Diagram rozdělení skeneru}
 % HW -> RPI -> displej, webové rozhraní, skenovací SW
-\section{HW zapojení}
+
 
 \chapter{Softwarová část a nastavení RPi}
 \section{Instalace OS a balíčků}
