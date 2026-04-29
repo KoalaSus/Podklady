@@ -31,8 +31,28 @@
 \chapter{Specifikace projektu}
 
 \chapter{Konstrukce a vývoj krabice}
+Krabice skeneru je navržena jako uzavřený box o vnějších rozměrech 24 × 18 × 15 cm. Tato velikost byla zvolena jako ideální kompromis mezi kompaktností a schopností skenovat objekty běžné velikosti (cca do 10 cm výšky).\\\\
+Hlavním důvodem pro toto uzavřené řešení je zajištění stálých světelných podmínek uvnitř skeneru. Vnější světlo by mohlo negativně ovlivňovat přesnost laserových linií při snímání kamerou. Pevné stěny krabice navíc pomáhají tlumit vibrace od motoru, což zabraňuje rozmazání výsledného 3D modelu. Růžové body v modelu znázorňují pozice pro umístění skenovacích prvků.
+\begin{figure}[h]
+    \centering
+    % První obrázek (ten s rozměry)
+    \begin{minipage}{0.48\textwidth}
+        \centering
+	\includegraphics[width=\textwidth]{img/krabice_rozmery.png} 
+        \caption{Technický nákres}
+    \end{minipage}
+    \hfill
+% Druhý obrázek (perspektiva)
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{img/krabice_vnitrek.png}
+        \caption{Perspektivní pohled}
+    \end{minipage}
+\end{figure}
 
 \chapter{Tištěné specifické díly} % skeneru
+\section{Lasery}
+\section{Motor}
 
 \chapter{Hardwarová část}
 \section{Seznam komponent}
