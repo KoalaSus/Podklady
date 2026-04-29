@@ -33,7 +33,7 @@
 \chapter{Specifikace projektu}
 
 \chapter{Konstrukce a vývoj krabice}
-Krabice skeneru je navržena jako uzavřený box o vnějších rozměrech 24 × 18 × 15 cm. Tato velikost byla zvolena jako ideální kompromis mezi kompaktností a schopností skenovat objekty běžné velikosti (cca do 10 cm výšky).\\\\
+Krabice skeneru je navržena jako uzavřený box o vnějších rozměrech 24 × 18 × 15 cm. Tato velikost byla zvolena jako ideální kompromis mezi kompaktností a schopností skenovat objekty běžné velikosti (cca do 10 cm výšky). Konstrukce vychází z konceptu Raspberry Pi Laser Scanner [1], oproti kterému však bylo zvoleno robustnější řešení.\\\\
 Hlavním důvodem pro toto uzavřené řešení je zajištění stálých světelných podmínek uvnitř skeneru. Vnější světlo by mohlo negativně ovlivňovat přesnost laserových linií při snímání kamerou. Pevné stěny krabice navíc pomáhají tlumit vibrace od motoru, což zabraňuje rozmazání výsledného 3D modelu. Růžové body v modelu znázorňují pozice pro umístění skenovacích prvků.
 \begin{figure}[h]
     \centering
@@ -116,5 +116,10 @@ Důležitou součástí jsou také krytky s vývody pro kabeláž, které slouž
 \section{API skeneru}
 
 \chapter{Závěr a zhodnocení}
+
+\begin{thebibliography}{9}
+\bibitem{instructables} 
+XIAO, Michael. \textit{Raspberry Pi Laser Scanner} [online]. Instructables, 2020 [cit. 2026-04-29]. Dostupné z: https://www.instructables.com/Raspberry-Pi-Laser-Scanner/
+\end{thebibliography}
 
 \end{document}
