@@ -4,6 +4,7 @@
 \usepackage[czech]{babel}
 \usepackage[T1]{fontenc}
 \usepackage{geometry}
+\usepackage{microtype}
 \geometry{margin=2.5cm}
 \usepackage[hidelinks]{hyperref}
 \usepackage{graphicx}
@@ -53,13 +54,13 @@
 
 \chapter{Specifikace projektu}
 
-Cílem projektu je návrh a realizace cenově dostupného 3D skeneru. Projekt reaguje na vysokou pořizovací cenu profesionálních technologií a představuje efektivní řešení postavené na platformě Raspberry Pi 5.
+Cílem projektu je návrh a realizace cenově dostupného 3D skeneru. Projekt reaguje na \mbox{vysokou} pořizovací cenu profesionálních technologií a představuje efektivní řešení  \mbox{postavené} na platformě Raspberry Pi 5.
 
 \section{Účel a motivace}
-Zařízení slouží k automatizované digitalizaci menších objektů. Hlavním přínosem je demokratizace složité technologie 3D skenování. Využitím metody laserové triangulace dosahujeme výrazného snížení nákladů při zachování technické kvality výstupu v podobě mračna bodů.
+Zařízení slouží k automatizované digitalizaci menších objektů. Hlavním přínosem \mbox{našeho} řešení je  demokratizace složité technologie 3D skenování. Využitím osvědčené metody laserové \mbox{triangulace} dosahujeme  výrazného snížení nákladů při zachování technické kvality výstupu v podobě mračna bodů.
 
 \section{Technické řešení}
-Jádrem systému je mikropočítač Raspberry Pi 5, který zajišťuje koordinaci dvou liniových laserů a Pi kamery, přesné polohování objektu pomocí krokového motoru a obsluhu webového rozhraní pro vzdálenou správu.
+Jádrem systému je mikropočítač Raspberry Pi 5, který zajišťuje koordinaci dvou liniových laserů a dvou Pi kamer, přesné polohování objektu pomocí krokového motoru a obsluhu webového rozhraní pro vzdálenou správu.
 
 \section{Parametry zařízení}
 \begin{table}[h]
@@ -69,9 +70,9 @@ Jádrem systému je mikropočítač Raspberry Pi 5, který zajišťuje koordinac
         \textbf{Parametr} & \textbf{Hodnota} \\ \hline
         Řídicí jednotka & Raspberry Pi 5 \\ \hline
         Metoda snímání & Laserová triangulace \\ \hline
-        Snímací hardware & 1$\times$ Pi Kamera, 2$\times$ Liniový laser \\ \hline
+        Snímací hardware & 2$\times$ Pi kamera, 2$\times$ Liniový laser \\ \hline
         Rozsah rotace & 360° (krokový motor) \\ \hline
-        Náklady & cca 1\,800~Kč \\ \hline
+        Náklady & $\approx$ 1\,800~Kč \\ \hline
     \end{tabular}
     \caption{Základní technická specifikace skeneru}
 \end{table}
@@ -80,30 +81,30 @@ Jádrem systému je mikropočítač Raspberry Pi 5, který zajišťuje koordinac
 Důraz je kladen na uzavřené provedení konstrukce, které eliminuje externí světelný šum a zajišťuje mechanickou stabilitu všech měřicích komponent vůči ose rotace.
 
 \chapter{Princip 3D skenování}
-Základním principem fungování tohoto zařízení je metoda laserové triangulace. Tato technika využívá známé geometrické vztahy mezi zdrojem světla, snímačem a měřeným objektem k určení přesných souřadnic bodů v trojrozměrném prostoru.
+Základním principem fungování tohoto zařízení je metoda laserové triangulace. Tato \mbox{technika} využívá známé geometrické vztahy mezi zdrojem světla, snímačem a měřeným objektem k určení přesných souřadnic bodů v trojrozměrném prostoru.
 
 \section{Princip laserové triangulace}
-Celý proces je založen na vytvoření pomyslného trojúhelníku, jehož vrcholy tvoří čočka kamery (v tomto případě PiCamera), zdroj laseru a bod na povrchu skenovaného objektu. 
+Celý proces je založen na vytvoření pomyslného trojúhelníku, jehož vrcholy tvoří čočka kamery (v tomto případě Pi kamer), zdroj laseru a bod na povrchu skenovaného objektu. 
 
 \begin{itemize}
     \item \textbf{Projekce linie:} Liniový laser vysílá úzký paprsek světla, který po dopadu na objekt vytvoří světelný řez jeho povrchem. 
     \item \textbf{Snímání deformace:} Kamera, která je vůči laseru umístěna pod pevným úhlem, snímá tuto linii. Pokud je povrch objektu rovný, jeví se linie jako přímka. Jakmile však narazí na reliéf, linie se z pohledu kamery v horizontální rovině deformuje.
-    \item \textbf{Výpočet souřadnic:} Software analyzuje horizontální posun každého pixelu laserové čáry v obraze. Čím blíže je povrch objektu ke kameře, tím více je čára vychýlena do strany. Pomocí goniometrických funkcí a znalosti tzv. \textit{báze} (pevná vzdálenost mezi laserem a kamerou) lze vypočítat přesnou hloubku každého bodu.
+    \item \textbf{Výpočet souřadnic:} Software analyzuje horizontální posun každého pixelu \mbox{laserové} čáry v obraze. Čím blíže je povrch objektu ke kameře, tím více je čára vychýlena do strany. Pomocí goniometrických funkcí a znalosti tzv. \textit{báze} (pevná vzdálenost mezi laserem a kamerou) lze vypočítat přesnou hloubku každého bodu.
 \end{itemize}
 
 
 
 \section{Metoda rotačního skenování}
-Aby bylo možné získat kompletní 360° model objektu, je skener vybaven otočnou platformou, což umožňuje nasnímat objekt ze všech stran bez nutnosti manipulace se zdrojem světla nebo kamerou.
+Aby bylo možné získat kompletní 360° model objektu, je skener vybaven otočnou \mbox{platformou}, což umožňuje nasnímat objekt ze všech stran bez nutnosti manipulace se zdrojem světla nebo kamerami.
 
 \begin{itemize}
     \item \textbf{Krokový motor:} Zajišťuje rotaci podstavce o přesně definované úhly. Každý krok motoru představuje nový vertikální řez objektem.
-    \item \textbf{Sekvenční snímání:} Po každém pootočení proběhne nová expozice a výpočet profilu. 
-    \item \textbf{Mračno bodů (Point Cloud):} Výsledkem procesu je soubor tisíců bodů definovaných souřadnicemi $[X, Y, Z]$. Tyto body dohromady tvoří digitální otisk povrchu, který lze následně v postprocessingu převést na polygonální síť (mesh).
+    \item \textbf{Sekvenční snímání:} Po každém pootočení proběhne nová expozice a výpočet \mbox{profilu.} 
+    \item \textbf{Mračno bodů (Point Cloud):} Výsledkem procesu je soubor tisíců bodů se souřadnicemi $[X, Y, Z]$. Tyto body dohromady tvoří digitální otisk povrchu, který lze následně v postprocessingu převést na polygonální síť (mesh).
 \end{itemize}
 \chapter{Konstrukce a vývoj krabice}
-Krabice skeneru je navržena jako uzavřený box o vnějších rozměrech 24 × 18 × 15 cm. Tato velikost byla zvolena jako ideální kompromis mezi kompaktností a schopností skenovat objekty běžné velikosti (cca do 10 cm výšky). Konstrukce vychází z konceptu Raspberry Pi Laser Scanner [1], oproti kterému však bylo zvoleno robustnější řešení.\\\\
-Hlavním důvodem pro toto uzavřené řešení je zajištění stálých světelných podmínek uvnitř skeneru. Vnější světlo by mohlo negativně ovlivňovat přesnost laserových linií při snímání kamerou. Pevné stěny krabice navíc pomáhají tlumit vibrace od motoru, což zabraňuje rozmazání výsledného 3D modelu. Růžové body v modelu znázorňují pozice pro umístění skenovacích prvků.
+Krabice skeneru je navržena jako uzavřený box o vnějších rozměrech 24 × 18 × 15 cm. Tato velikost byla zvolena jako ideální kompromis mezi kompaktností a schopností \mbox{skenovat} \mbox{objekty} běžné velikosti ($\approx$ do 10 cm výšky). Konstrukce vychází z konceptu Raspberry Pi Laser Scanner [1], oproti kterému však bylo zvoleno robustnější řešení.\\\\
+Hlavním důvodem pro toto uzavřené řešení je zajištění stálých světelných podmínek uvnitř skeneru. Vnější světlo by mohlo negativně ovlivňovat přesnost laserových linií při snímání Pi kamerami. Pevné stěny krabice navíc pomáhají tlumit vibrace od motoru, což zabraňuje rozmazání výsledného 3D modelu. Růžové body v modelu znázorňují pozice pro umístění skenovacích prvků.
 \begin{figure}[h]
     \centering
    
@@ -123,8 +124,8 @@ Hlavním důvodem pro toto uzavřené řešení je zajištění stálých světe
 
 \chapter{Hardwarová část}
 \section{Tištěné specifické díly}
-Jednotlivé mechanické díly byly navrženy s ohledem na přesné ustavení optických a pohonných prvků konstrukce. Držáky laserů a motoru zajišťují tuhost sestavy, která je klíčová pro eliminaci geometrických odchylek během rotace snímaného objektu. Rozměry a tvary těchto komponent byly optimalizovány pro technologii 3D tisku, čímž bylo dosaženo nízké hmotnosti, aniž by díly ztratily svou pevnost.\\\\
-Důležitou součástí jsou také krytky s vývody pro kabeláž, které slouží k organizaci vodičů a zabraňují jejich nechtěnému kontaktu s pohyblivými částmi skeneru. Variabilita v horizontálním a vertikálním provedení krytek umožňuje flexibilní vedení tras k řídicí jednotce bez nutnosti ostrých ohybů kabelů.
+Jednotlivé mechanické díly byly navrženy tak, aby bylo dosaženo přesného ustavení \mbox{optických} i pohonných prvků konstrukce. Držáky laserů společně s držákem motoru \mbox{zajišťují} tuhost sestavy, která je klíčová pro eliminaci geometrických odchylek během rotace snímaného objektu. Tvary i rozměry těchto komponent byly optimalizovány pro technologii 3D~tisku, čímž bylo dosaženo nízké hmotnosti při zachování vysoké pevnosti dílů.\\\\
+Důležitou součástí jsou také krytky s vývody pro kabeláž, které slouží k organizaci  \mbox{vodičů} a zabraňují jejich nechtěnému kontaktu s pohyblivými částmi skeneru. Variabilita v   \mbox{provedení} krytek umožňuje flexibilní vedení tras k řídicí jednotce bez nutnosti ostrých ohybů kabelů.
 \begin{figure}[h]
     \centering
     % 1. řada
@@ -175,14 +176,14 @@ Důležitou součástí jsou také krytky s vývody pro kabeláž, které slouž
 \end{figure}
 \FloatBarrier
 \section{Seznam komponent}
-Skladba komponent byla zvolena s ohledem na dosažení nízkonákladového řešení (cca 1\,800\,Kč) při zachování vysoké přesnosti měření.
+Skladba komponent byla zvolena s ohledem na dosažení nízkonákladového řešení ($\approx$~1\,800\,Kč) při zachování vysoké přesnosti měření.
 
 \begin{itemize}
     \item \textbf{Řídicí jednotka:} Raspberry Pi 5
     \item \textbf{Snímací hardware:}
     \begin{itemize}
-        \item Raspberry Pi Camera Module v2 (8\,Mpx)
-        \item MIPI FFC flex video kabel (50 cm) pro flexibilní umístění kamery
+        \item 2$\times$ Pi kamera (kamerový modul v2, 8\,Mpx)
+        \item MIPI FFC flex video kabel (50 cm) pro flexibilní umístění Pi kamer
         \item 2$\times$ Liniový laserový modul (červený, 5\,V, 5\,mW, 650\,nm)
     \end{itemize}
     \item \textbf{Pohonný systém:}
