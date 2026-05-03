@@ -10,14 +10,14 @@
 \usepackage{graphicx}
 \usepackage{subcaption}
 \usepackage{placeins}
-
+\usepackage{float}
 
 
 
 \begin{document}
 \begin{titlepage}
    \centering
-    % Vložení loga školy
+ 
     \includegraphics[width=0.4\textwidth]{img/zcu_logo.png} \\ 
     \vspace{1cm}
     
@@ -200,7 +200,51 @@ Skladba komponent byla zvolena s ohledem na dosažení nízkonákladového řeš
     \end{itemize}
     \item \textbf{Konstrukční díly:} Specifické 3D tištěné držáky a krytky
 \end{itemize}
+\clearpage
 \section{Schéma zapojení}
+Propojení všech elektronických komponent je realizováno prostřednictvím nepájivého pole, které slouží jako centrální uzel pro distribuci napájení i~datových signálů. Celkové schéma zapojení vytvořené v~prostředí Fritzing je znázorněno na obrázku \ref{fig:schema}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{img/schema_zapojeni.png}
+    \caption{Kompletní schéma zapojení 3D skeneru}
+    \label{fig:schema}
+\end{figure}
+\clearpage
+\subsection{Detailní zapojení komponent}
+Následující tabulky specifikují propojení jednotlivých prvků s~řídicí jednotkou Raspberry Pi 5 a externím napájením.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|p{7cm}|}
+        \hline
+        \textbf{Ovladač A4988} & \textbf{Cílový pin / Zdroj} & \textbf{Funkce a poznámka} \\ \hline
+        VMOT & Externí zdroj (12\,V) & Přívod hlavního proudu pro pohon \mbox{samotného} motoru. \\ \hline
+        GND (napájení motoru) & Externí zdroj (GND) & Uzemnění externího zdroje. Propojeno s~GND Raspberry Pi. \\ \hline
+        1A, 1B / 2A, 2B & Cívky motoru & Výstupy napájející přímo první \mbox{a druhou} cívku motoru. \\ \hline
+        VDD / GND & RPi Pin 1 / Pin 6 & Napájení logiky driveru (3,3\,V) \mbox{a společné} uzemnění. \\ \hline
+        STEP & RPi Pin 23 (GPIO 11) & Přijímá pulzy z~RPi (každý přechod 1-0 vykoná jeden krok). \\ \hline
+        DIR & RPi Pin 24 (GPIO 8) & Logická úroveň určuje směr otáčení \mbox{(závislé} na zapojení motoru). \\ \hline
+        RST / SLP & Vzájemné propojení & Piny jsou propojeny mezi sebou, čímž je driver trvale aktivní. \\ \hline
+    \end{tabular}
+    \caption{Detailní zapojení driveru krokového motoru A4988}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|p{7cm}|}
+        \hline
+        \textbf{Periferie} & \textbf{Zapojení (RPi)} & \textbf{Funkce a poznámka} \\ \hline
+        Kamerové moduly & CSI port 0 a 1 & Snímání obrazu (dolní a horní kamera) přes sběrnici CSI. \\ \hline
+        Liniové lasery & Pin 2 (5\,V) / Pin 6 & Napájení laserů a uzemnění přes \mbox{breadboard}. \\ \hline
+        LCD VCC / GND & Pin 1 (3,3\,V) / Pin 6 & Napájení I2C modulu a displeje se \mbox{společnou} zemí. \\ \hline
+        LCD SDA & Pin 3 (SDA) & Datová linka I2C sběrnice pro \mbox{komunikaci} s~displejem. \\ \hline
+        LCD SCL & Pin 5 (SCL) & Hodinový signál I2C sběrnice \mbox{generovaný} Raspberry Pi. \\ \hline
+    \end{tabular}
+    \caption{Zapojení kamer, laserů a informačního displeje}
+\end{table}
+
+\textit{Poznámka: Pro správnou funkci logických signálů jsou všechny záporné póly (GND) z~Raspberry Pi, externího zdroje i~periferií vzájemně propojeny na společnou sběrnici nepájivého pole.}
 
 \chapter{Softwarová část a nastavení RPi}
 \section{Instalace OS a balíčků}
