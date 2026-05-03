@@ -11,7 +11,11 @@
 \usepackage{subcaption}
 \usepackage{placeins}
 \usepackage{float}
-
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd{\@makechapterhead}{\vspace*{50\p@}}{\vspace*{0pt}}{}{}
+\patchcmd{\@makechapterhead}{\vskip 40\p@}{\vskip 10pt}{}{}
+\makeatother
 
 
 \begin{document}
@@ -126,49 +130,44 @@ Hlavním důvodem pro toto uzavřené řešení je zajištění stálých světe
 \section{Tištěné specifické díly}
 Jednotlivé mechanické díly byly navrženy tak, aby bylo dosaženo přesného ustavení \mbox{optických} i pohonných prvků konstrukce. Držáky laserů společně s držákem motoru \mbox{zajišťují} tuhost sestavy, která je klíčová pro eliminaci geometrických odchylek během rotace snímaného objektu. Tvary i rozměry těchto komponent byly optimalizovány pro technologii 3D~tisku, čímž bylo dosaženo nízké hmotnosti při zachování vysoké pevnosti dílů.\\\\
 Důležitou součástí jsou také krytky s vývody pro kabeláž, které slouží k organizaci  \mbox{vodičů} a zabraňují jejich nechtěnému kontaktu s pohyblivými částmi skeneru. Variabilita v   \mbox{provedení} krytek umožňuje flexibilní vedení tras k řídicí jednotce bez nutnosti ostrých ohybů kabelů.
-\begin{figure}[h]
+\begin{figure}[H]
     \centering
     % 1. řada
     \begin{subfigure}[t]{0.45\textwidth}
         \centering
-        \includegraphics[height=4cm,keepaspectratio]{img/motor.png}
+        \includegraphics[height=3.5cm,keepaspectratio]{img/motor.png}
         \caption{Držák krokového motoru}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.45\textwidth}
         \centering
-        \includegraphics[height=4cm,keepaspectratio]{img/laser_hor.png}
+        \includegraphics[height=3.5cm,keepaspectratio]{img/laser_hor.png}
         \caption{Horizontální držák laseru}
     \end{subfigure}
-	
-	\vspace{1.5em}
-
+\vspace{0.3cm}
     % 2. řada
     \begin{subfigure}[t]{0.45\textwidth}
         \centering
-        \includegraphics[height=4cm,keepaspectratio]{img/laser_ver.png}
+        \includegraphics[height=3.5cm,keepaspectratio]{img/laser_ver.png}
         \caption{Vertikální držák laseru}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.45\textwidth}
         \centering
-        \includegraphics[height=4cm,keepaspectratio]{img/krytka_laser_hor.png}
+        \includegraphics[height=3.5cm,keepaspectratio]{img/krytka_laser_hor.png}
         \caption{Krytka laseru}
     \end{subfigure}
-    \end{figure}
-  
-    \begin{figure}[h]
- \ContinuedFloat
-    % 3. řada
+ \vspace{0.3cm}
+     % 3. Řada
     \begin{subfigure}[t]{0.45\textwidth}
         \centering
-        \includegraphics[height=4cm,keepaspectratio]{img/krytka_laser_hor_kabely.png}
+        \includegraphics[height=3.5cm,keepaspectratio]{img/krytka_laser_hor_kabely.png}
         \caption{Krytka s vývodem (horizontální)}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.45\textwidth}
         \centering
-        \includegraphics[height=4cm,keepaspectratio]{img/krytka_laser_ver_kabely.png}
+        \includegraphics[height=3.5cm,keepaspectratio]{img/krytka_laser_ver_kabely.png}
         \caption{Krytka s vývodem (vertikální)}
     \end{subfigure}
     
@@ -218,7 +217,7 @@ Následující tabulky specifikují propojení jednotlivých prvků s~řídicí 
     \centering
     \begin{tabular}{|l|l|p{7cm}|}
         \hline
-        \textbf{Ovladač A4988} & \textbf{Cílový pin / Zdroj} & \textbf{Funkce a poznámka} \\ \hline
+        \textbf{Driver A4988} & \textbf{Cílový pin / Zdroj} & \textbf{Funkce a poznámka} \\ \hline
         VMOT & Externí zdroj (12\,V) & Přívod hlavního proudu pro pohon \mbox{samotného} motoru. \\ \hline
         GND (napájení motoru) & Externí zdroj (GND) & Uzemnění externího zdroje. Propojeno s~GND Raspberry Pi. \\ \hline
         1A, 1B / 2A, 2B & Cívky motoru & Výstupy napájející přímo první \mbox{a druhou} cívku motoru. \\ \hline
@@ -227,7 +226,7 @@ Následující tabulky specifikují propojení jednotlivých prvků s~řídicí 
         DIR & RPi Pin 24 (GPIO 8) & Logická úroveň určuje směr otáčení \mbox{(závislé} na zapojení motoru). \\ \hline
         RST / SLP & Vzájemné propojení & Piny jsou propojeny mezi sebou, čímž je driver trvale aktivní. \\ \hline
     \end{tabular}
-    \caption{Detailní zapojení driveru krokového motoru A4988}
+    \caption{Detailní zapojení driveru A4988 pro řízení krokového motoru}
 \end{table}
 
 \begin{table}[H]
