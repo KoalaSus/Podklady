@@ -246,12 +246,51 @@ Následující tabulky specifikují propojení jednotlivých prvků s~řídicí 
 \textit{Poznámka: Pro správnou funkci logických signálů jsou všechny záporné póly (GND) z~Raspberry Pi, externího zdroje i~periferií vzájemně propojeny na společnou sběrnici nepájivého pole.}
 
 \chapter{Softwarová část a nastavení RPi}
-\section{Instalace OS a balíčků}
+
+\section{Instalace OS a základní konfigurace}
+Pro řízení skeneru byl zvolen mikropočítač Raspberry Pi 5. Jako operační systém byla použita distribuce \textbf{Raspberry Pi OS Lite (64-bit)}, která neobsahuje grafické rozhraní, což snižuje systémovou režii a zvyšuje stabilitu aplikací běžících na pozadí.
+
+Při prvotní instalaci pomocí nástroje Raspberry Pi Imager byly nastaveny následující parametry pro vzdálený přístup a síťovou konektivitu:
+
+\begin{itemize}
+    \item \textbf{Hostname:} \texttt{skener.local}
+    \item \textbf{Uživatelský účet:} 
+    \begin{itemize}
+        \item Jméno: \texttt{appuser}
+        \item Heslo: \texttt{appuser}
+    \end{itemize}
+    \item \textbf{Vzdálený přístup:} Aktivováno SSH (Secure Shell) pro správu přes terminál.
+    \item \textbf{Bezdrátové připojení:} Automatické připojení k síti (SSID: \texttt{zpp-rpi}).
+\end{itemize}
+
+\section{Instalace softwarových balíčků}
+Po úspěšné instalaci systému a aktualizaci repozitářů byly doinstalovány klíčové \mbox{komponenty} nezbytné pro běh API a webového rozhraní. Správa balíčků probíhá standardně přes nástroj \texttt{apt}.
+
+\begin{itemize}
+    \item \textbf{Python:} Primární programovací jazyk pro logiku skenování, ovládání GPIO pinů (motory, lasery) a zpracování obrazu.
+    \item \textbf{Nginx:} Vysoce výkonný webový server, který slouží jako reverzní proxy pro webové rozhraní skeneru. Zajišťuje plynulý přístup k ovládacímu panelu přes prohlížeč.
+    \item \textbf{UFW (Uncomplicated Firewall):} Nástroj pro správu síťového provozu. Slouží k zabezpečení zařízení povolením pouze nezbytných portů (např. 22 pro SSH a 80 pro HTTP provoz).
+\end{itemize}
+\section{Nastavení potřebných služeb}
+\section{Simulace a generování testovacích dat}
+Vzhledem k paralelnímu vývoji hardwaru a softwaru byla vytvořena virtuální simulace skeneru v prostředí Blender. Tento přístup umožnil vývoj algoritmů pro zpracování obrazu nezávisle na fyzické kompletaci zařízení.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{img/blender_rendered.png}
+    \caption{Renderovaná simulace skenovací scény: \textbf{modře} je vyznačen testovací objekt, \textbf{červeně} dopadající laserová linie, \textbf{zeleně} rotační podložka a \textbf{černě} jsou naznačeny směrové vektory kamer.}
+    \label{fig:blender_render}
+\end{figure}
+
+Pro simulaci byl navržen virtuální setup odpovídající reálné konstrukci:
+\begin{itemize}
+    \item \textbf{Virtuální senzory:} Pozice kamer a liniových laserů přesně odpovídá geometrii krabice.
+    \item \textbf{Datová sada:} Byla vygenerována sekvence minimálně 120 snímků rozložených rovnoměrně v rozsahu 360° rotace objektu.
+    \item \textbf{Kvalita výstupu:} Snímky jsou renderovány v nativním rozlišení Pi kamer ($3280 \times 2464$\,px) bez externích zdrojů světla, což věrně simuluje podmínky uvnitř uzavřené konstrukce.
+\end{itemize}
 \section{API skeneru}
 \section{Webové rozhraní}
 \section{Displej}
-
-
 \chapter{Závěr a zhodnocení}
 
 \begin{thebibliography}{9}
