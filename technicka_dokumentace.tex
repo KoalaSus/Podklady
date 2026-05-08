@@ -295,12 +295,43 @@ Po úspěšné instalaci systému a aktualizaci repozitářů byly doinstalován
     \item \textbf{Python:} Primární programovací jazyk pro logiku skenování, ovládání GPIO pinů (motory, lasery) a zpracování obrazu.
     \item \textbf{UFW (Uncomplicated Firewall):} Nástroj pro správu síťového provozu. Slouží k zabezpečení zařízení povolením pouze nezbytných portů (např. 22 pro SSH a 80 pro HTTP provoz).
 \end{itemize}
-\section{Nastavení potřebných služeb}
-Pro zajištění autonomního běhu skeneru jsou klíčové procesy nastaveny jako systémové služby (\textit{systemd units}). To zajišťuje automatický start po zapojení napájení a automatický restart v případě chyby.
-\begin{itemize}
-    \item \textbf{scanner\_api.service:} Zajišťuje běh Flask/FastAPI serveru pro komunikaci s webem.
-    \item \textbf{display\_handler.service:} Samostatný proces obsluhující I2C LCD displej.
-\end{itemize}
+\section{Nastavení systémových služeb (systemd)}
+Pro zajištění plné automatizace a stability systému byly vytvořeny dvě systémové služby v~rámci manažeru \textit{systemd}. Tyto služby zajišťují, že se obslužný software spustí ihned po startu operačního systému a v~případě neočekávaného ukončení (chyba, pád) dojde k~jeho automatickému restartu.
+
+Obě služby využívají izolované virtuální prostředí (\textit{venv}), což zajišťuje konzistenci verzí použitých knihoven nezávisle na globálním nastavení systému.
+
+\subsection{Služba řízení skeneru (scanner\_api)}
+Tato služba (\texttt{skener\_sluzba.service}) obsluhuje nízkoúrovňovou logiku zařízení, včetně ovládání motorů, laserů a komunikace s~kamerami. 
+
+\begin{lstlisting}[caption=Konfigurace služby pro řízení skeneru]
+[Unit]
+Description=Skener Sluzba
+After=network.target
+
+[Service]
+ExecStart=/home/appuser/python/venv/bin/python /home/appuser/python/skener_sluzba.py
+WorkingDirectory=/home/appuser/python
+Restart=always
+User=appuser
+
+[Install]
+WantedBy=multi-user.target
+\end{lstlisting}
+
+\subsection{Služba webového rozhraní (scanner\_web)}
+Samostatná služba (\texttt{skener\_web.service}) spravuje webový server. Oddělení webu od samotné logiky skenování zvyšuje stabilitu systému – případná chyba v~uživatelském rozhraní neovlivní probíhající měření a pohyby motoru.
+
+\begin{lstlisting}[caption=Konfigurace služby pro webové rozhraní]
+[Unit]
+Description=Skener Webove Rozhrani
+After=network.target
+
+[Service]
+ExecStart=/home/appuser/python/venv/bin/python /home/appuser/python/skener_web.py
+WorkingDirectory=/home/appuser/python
+Restart=always
+User=appuser
+\end{lstlisting}
 \section{Simulace a generování testovacích dat}
 Vzhledem k paralelnímu vývoji hardwaru a softwaru byla vytvořena virtuální simulace skeneru v prostředí Blender. Tento přístup umožnil vývoj algoritmů pro zpracování obrazu nezávisle na fyzické kompletaci zařízení.
 
@@ -351,6 +382,8 @@ Tato kapitola popisuje způsoby interakce uživatele se skenerem. Zařízení ko
 
 \section{Webové rozhraní}
 Uživatelské rozhraní je navrženo jako responzivní webová aplikace založená na standardech HTML5 a JavaScriptu. Aplikace (Dashboard) komunikuje asynchronně s~API běžícím na Raspberry Pi 5, což umožňuje plynulé ovládání bez nutnosti obnovování stránky.
+
+% fotka webu
 
 \begin{itemize}
     \item \textbf{Hlavní ovládací panel:} Obsahuje prvky pro spuštění skenování (\textit{Start}), pozastavení (\textit{Stop}) a nouzové ukončení procesů (\textit{Kill}).
