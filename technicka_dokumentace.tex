@@ -17,6 +17,31 @@
 \patchcmd{\@makechapterhead}{\vskip 40\p@}{\vskip 10pt}{}{}
 \makeatother
 
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstset{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{green!60!black},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{orange},
+    basicstyle=\ttfamily\small,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    language=Python
+}
+
 
 \begin{document}
 \begin{titlepage}
@@ -268,10 +293,14 @@ Po úspěšné instalaci systému a aktualizaci repozitářů byly doinstalován
 
 \begin{itemize}
     \item \textbf{Python:} Primární programovací jazyk pro logiku skenování, ovládání GPIO pinů (motory, lasery) a zpracování obrazu.
-    \item \textbf{Nginx:} Vysoce výkonný webový server, který slouží jako reverzní proxy pro webové rozhraní skeneru. Zajišťuje plynulý přístup k ovládacímu panelu přes prohlížeč.
     \item \textbf{UFW (Uncomplicated Firewall):} Nástroj pro správu síťového provozu. Slouží k zabezpečení zařízení povolením pouze nezbytných portů (např. 22 pro SSH a 80 pro HTTP provoz).
 \end{itemize}
 \section{Nastavení potřebných služeb}
+Pro zajištění autonomního běhu skeneru jsou klíčové procesy nastaveny jako systémové služby (\textit{systemd units}). To zajišťuje automatický start po zapojení napájení a automatický restart v případě chyby.
+\begin{itemize}
+    \item \textbf{scanner\_api.service:} Zajišťuje běh Flask/FastAPI serveru pro komunikaci s webem.
+    \item \textbf{display\_handler.service:} Samostatný proces obsluhující I2C LCD displej.
+\end{itemize}
 \section{Simulace a generování testovacích dat}
 Vzhledem k paralelnímu vývoji hardwaru a softwaru byla vytvořena virtuální simulace skeneru v prostředí Blender. Tento přístup umožnil vývoj algoritmů pro zpracování obrazu nezávisle na fyzické kompletaci zařízení.
 
@@ -288,9 +317,70 @@ Pro simulaci byl navržen virtuální setup odpovídající reálné konstrukci:
     \item \textbf{Datová sada:} Byla vygenerována sekvence minimálně 120 snímků rozložených rovnoměrně v rozsahu 360° rotace objektu.
     \item \textbf{Kvalita výstupu:} Snímky jsou renderovány v nativním rozlišení Pi kamer ($3280 \times 2464$\,px) bez externích zdrojů světla, což věrně simuluje podmínky uvnitř uzavřené konstrukce.
 \end{itemize}
-\section{API skeneru}
+\clearpage
+\section{Algoritmus zpracování obrazu a 3D rekonstrukce}
+Jádrem softwaru je proces transformace 2D obrazových dat z Pi kamer do 3D mračna bodů. Tento proces probíhá v několika krocích.
+
+\subsection{Detekce laserové linie pomocí HSV maskování}
+Pro filtraci červeného laseru v obraze je využita segmentace v barevném prostoru HSV. Na rozdíl od RGB je HSV prostor méně náchylný na změny intenzity osvětlení.
+\begin{lstlisting}[caption=Výstřižek kódu pro extrakci červených bodů]
+hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+lower_red1 = np.array([0, 150, 50])
+upper_red1 = np.array([10, 255, 255])
+mask = cv2.inRange(hsv, lower_red1, upper_red1)
+mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+\end{lstlisting}
+
+\subsection{Matematický model rekonstrukce}
+Každý nalezený bod v masce představuje průsečík laserové roviny a povrchu objektu. Výpočet souřadnice $Z$ (vzdálenost) a následný převod na kartézské souřadnice $[x, y, z]$ probíhá podle vztahů:
+\begin{equation}
+    x = radius \cdot \cos(\alpha) + offset_x
+\end{equation}
+\begin{equation}
+    y = radius \cdot \sin(\alpha)
+\end{equation}
+\begin{equation}
+    z = camera\_distance - \Delta y \cdot scale
+\end{equation}
+kde $\alpha$ odpovídá aktuálnímu kroku motoru převedenému na radiány.
+
+\subsection{Tvorba polygonální sítě (Mesh)}
+Mračno bodů je pomocí knihovny \texttt{trimesh} převedeno na výsledný model. Pro uzavření povrchu je využit algoritmus \textit{Convex Hull}. Software dále podporuje booleovské operace (rozdíl modelů), které umožňují odečíst referenční model podložky od výsledného skenu objektu.
+\chapter{Uživatelské rozhraní}
+Tato kapitola popisuje způsoby interakce uživatele se skenerem. Zařízení kombinuje \mbox{vzdálenou} správu pomocí webové aplikace pro plnou kontrolu nad procesem a lokální informační displej pro okamžitou diagnostiku stavu.
+
 \section{Webové rozhraní}
-\section{Displej}
+Uživatelské rozhraní je navrženo jako responzivní webová aplikace založená na standardech HTML5 a JavaScriptu. Aplikace (Dashboard) komunikuje asynchronně s~API běžícím na Raspberry Pi 5, což umožňuje plynulé ovládání bez nutnosti obnovování stránky.
+
+\begin{itemize}
+    \item \textbf{Hlavní ovládací panel:} Obsahuje prvky pro spuštění skenování (\textit{Start}), pozastavení (\textit{Stop}) a nouzové ukončení procesů (\textit{Kill}).
+    \item \textbf{Indikace průběhu:} Dynamický progress bar zobrazuje aktuální stav skenování v procentech na základě dat ze stavového boxu.
+    \item \textbf{Správa skenů:} Sekce pro prohlížení a stahování hotových 3D modelů ve formátu .STL.
+\end{itemize}
+
+\section{Informační displej}
+Pro okamžitou vizuální zpětnou vazbu bez nutnosti kontroly webového rozhraní je zařízení osazeno LCD displejem $16\times2$ znaků s I2C sběrnicí. Displej slouží jako stavový indikátor, který v reálném čase interpretuje data přijímaná z hlavní řídicí aplikace.
+
+\subsection{Logika zobrazení a stavový automat}
+Program obsluhující displej pracuje jako stavový automat, který přijímá data ve formátu JSON. Struktura vstupních dat definuje aktuální stav zařízení, procentuální průběh skenování a případné chybové hlášky.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{img/displej_diagram.png}
+    \caption{Diagram stavové logiky informačního displeje}
+    \label{fig:displej_diagram}
+\end{figure}
+
+Mezi definované stavy patří:
+\begin{itemize}
+    \item \textbf{READY:} Systém je připraven, na displeji svítí text „Připraveno na sken“.
+    \item \textbf{SCAN:} Probíhá aktivní snímání. Horní řádek zobrazuje „Skenování“, spodní pak numerický progress bar.
+    \item \textbf{PAUSED:} Skenování bylo uživatelem pozastaveno.
+    \item \textbf{DONE:} Úspěšné dokončení operace s informací o uloženém souboru.
+    \item \textbf{ERROR:} V případě selhání (např. ztráta spojení s kamerou) se vypíše stručná chybová hláška.
+\end{itemize}
+
+Po dokončení úlohy nebo odstranění chyby se systém automaticky vrací do stavu čekání na nová data.
 \chapter{Závěr a zhodnocení}
 
 \begin{thebibliography}{9}
