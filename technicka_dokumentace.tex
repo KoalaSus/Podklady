@@ -5,24 +5,22 @@
 \usepackage[T1]{fontenc}
 \usepackage{geometry}
 \usepackage{microtype}
-\geometry{margin=2.5cm}
 \usepackage[hidelinks]{hyperref}
 \usepackage{graphicx}
 \usepackage{subcaption}
 \usepackage{placeins}
 \usepackage{float}
 \usepackage{etoolbox}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\geometry{margin=2.5cm}
 \makeatletter
 \patchcmd{\@makechapterhead}{\vspace*{50\p@}}{\vspace*{0pt}}{}{}
 \patchcmd{\@makechapterhead}{\vskip 40\p@}{\vskip 10pt}{}{}
 \makeatother
-
-\usepackage{listings}
-\usepackage{xcolor}
-
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
-
 \lstset{
     backgroundcolor=\color{backcolour},
     commentstyle=\color{green!60!black},
@@ -132,7 +130,7 @@ Aby bylo možné získat kompletní 360° model objektu, je skener vybaven otoč
     \item \textbf{Mračno bodů (Point Cloud):} Výsledkem procesu je soubor tisíců bodů se souřadnicemi $[X, Y, Z]$. Tyto body dohromady tvoří digitální otisk povrchu, který lze následně v postprocessingu převést na polygonální síť (mesh).
 \end{itemize}
 \chapter{Konstrukce a vývoj krabice}
-Krabice skeneru je navržena jako uzavřený box o vnějších rozměrech 24 × 18 × 15 cm. Tato velikost byla zvolena jako ideální kompromis mezi kompaktností a schopností \mbox{skenovat} \mbox{objekty} běžné velikosti ($\approx$ do 10 cm výšky). Konstrukce vychází z konceptu Raspberry Pi Laser Scanner [1], oproti kterému však bylo zvoleno robustnější řešení.\\\\
+Krabice skeneru je navržena jako uzavřený box o vnějších rozměrech 24 × 18 × 15 cm. Tato velikost byla zvolena jako ideální kompromis mezi kompaktností a schopností \mbox{skenovat} \mbox{objekty} běžné velikosti ($\approx$ do 10 cm výšky). Konstrukce vychází z konceptu Raspberry Pi Laser Scanner \cite{instructables}, oproti kterému však bylo zvoleno robustnější řešení.\\\\
 Hlavním důvodem pro toto uzavřené řešení je zajištění stálých světelných podmínek uvnitř skeneru. Vnější světlo by mohlo negativně ovlivňovat přesnost laserových linií při snímání Pi kamerami. Pevné stěny krabice navíc pomáhají tlumit vibrace od motoru, což zabraňuje rozmazání výsledného 3D modelu. Růžové body v modelu znázorňují pozice pro umístění skenovacích prvků.
 \begin{figure}[h]
     \centering
@@ -247,7 +245,7 @@ Následující tabulky specifikují propojení jednotlivých prvků s~řídicí 
         GND (napájení motoru) & Externí zdroj (GND) & Uzemnění externího zdroje. Propojeno s~GND Raspberry Pi. \\ \hline
         1A, 1B / 2A, 2B & Cívky motoru & Výstupy napájející přímo první \mbox{a druhou} cívku motoru. \\ \hline
         VDD / GND & RPi Pin 1 / Pin 6 & Napájení logiky driveru (3,3\,V) \mbox{a společné} uzemnění. \\ \hline
-        STEP & RPi Pin 23 (GPIO 11) & Přijímá pulzy z~RPi (každý přechod 1-0 vykoná jeden krok). \\ \hline
+        STEP & RPi Pin 23 (GPIO 11) & Přijímá pulzy z~RPi (každý přechod $1\rightarrow0$ vykoná jeden krok). \\ \hline
         DIR & RPi Pin 24 (GPIO 8) & Logická úroveň určuje směr otáčení \mbox{(závislé} na zapojení motoru). \\ \hline
         RST / SLP & Vzájemné propojení & Piny jsou propojeny mezi sebou, čímž je driver trvale aktivní. \\ \hline
     \end{tabular}
@@ -332,6 +330,7 @@ WorkingDirectory=/home/appuser/python
 Restart=always
 User=appuser
 \end{lstlisting}
+\clearpage
 \section{Simulace a generování testovacích dat}
 Vzhledem k paralelnímu vývoji hardwaru a softwaru byla vytvořena virtuální simulace skeneru v prostředí Blender. Tento přístup umožnil vývoj algoritmů pro zpracování obrazu nezávisle na fyzické kompletaci zařízení.
 
@@ -350,56 +349,53 @@ Pro simulaci byl navržen virtuální setup odpovídající reálné konstrukci:
 \end{itemize}
 \clearpage
 \section{Algoritmus zpracování obrazu a 3D rekonstrukce}
-Jádrem softwaru je proces transformace 2D obrazových dat z Pi kamer do 3D mračna bodů. Tento proces probíhá v několika krocích.
 
-\subsection{Detekce laserové linie pomocí HSV maskování}
-Pro filtraci červeného laseru v obraze je využita segmentace v barevném prostoru HSV. Na rozdíl od RGB je HSV prostor méně náchylný na změny intenzity osvětlení.
-\begin{lstlisting}[caption=Výstřižek kódu pro extrakci červených bodů]
-hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+Jádrem softwaru je proces transformace 2D obrazových dat z Pi kamer do podoby 3D mračna bodů a následná tvorba polygonální sítě. Tento proces je rozdělen do tří klíčových fází.
+\vspace{-0.1cm}
+\subsection{Detekce laserové linie a segmentace obrazu}
+Pro spolehlivou extrakci laserové stopy je využit barevný prostor HSV, který lépe izoluje chromatičnost od jasu. Vzhledem k povaze HSV prostoru, kde červená barva přechází přes nulovou hodnotu, je využita duální maska pokrývající oba konce spektra.
+
+\begin{lstlisting}[language=Python, basicstyle=\footnotesize\ttfamily, caption=Implementace duální HSV masky a morfologické filtrace]
+# Definice rozsahu pro cervenou barvu (prechod 0/180)
 lower_red1 = np.array([0, 150, 50])
 upper_red1 = np.array([10, 255, 255])
-mask = cv2.inRange(hsv, lower_red1, upper_red1)
+lower_red2 = np.array([170, 150, 50])
+upper_red2 = np.array([180, 255, 255])
+mask = cv2.inRange(hsv, lower_red1, upper_red1) + \
+       cv2.inRange(hsv, lower_red2, upper_red2)
+# Odstraneni sumu pomoci morfologickeho otevreni
+kernel = np.ones((5,5), np.uint8)
 mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 \end{lstlisting}
 
-\subsection{Matematický model rekonstrukce}
-Každý nalezený bod v masce představuje průsečík laserové roviny a povrchu objektu. Výpočet souřadnice $Z$ (vzdálenost) a následný převod na kartézské souřadnice $[x, y, z]$ probíhá podle vztahů:
-\begin{equation}
-    x = radius \cdot \cos(\alpha) + offset_x
-\end{equation}
-\begin{equation}
-    y = radius \cdot \sin(\alpha)
-\end{equation}
-\begin{equation}
-    z = camera\_distance - \Delta y \cdot scale
-\end{equation}
-kde $\alpha$ odpovídá aktuálnímu kroku motoru převedenému na radiány.
+Pro přesnou lokalizaci souřadnic bodů nejsou využity pouze surové pixely masky, ale výpočet obrazových momentů (\textit{image moments}) pomocí funkce \texttt{cv2.moments}. Tento přístup umožňuje nalézt těžiště kontury laserové čáry s vysokou sub-pixelovou přesností, což výrazně snižuje šum ve výsledném mračnu bodů.
 
-\subsection{Tvorba polygonální sítě (Mesh)}
-Mračno bodů je pomocí knihovny \texttt{trimesh} převedeno na výsledný model. Pro uzavření povrchu je využit algoritmus \textit{Convex Hull}. Software dále podporuje booleovské operace (rozdíl modelů), které umožňují odečíst referenční model podložky od výsledného skenu objektu.
+\subsection{Geometrická transformace a matematický model}
+Každý detekovaný bod v obraze je transformován z pixelových souřadnic $[x, y]$ do 3D prostoru. Výpočet využívá aktuální úhel natočení podložky $\alpha$ (přepočtený z indexu snímku a celkového počtu kroků) a kalibrační konstanty \texttt{pixel\_scale} a \texttt{camera\_distance}.
+
+Výpočet kartézských souřadnic $[x, y, z]$ probíhá podle následujících vztahů:
+\begin{align*}
+    x &= \text{radius} \cdot \cos(\alpha) + \text{offset}_x \\
+    y &= radius \cdot \sin(\alpha) \\
+    z &= camera\_distance - \Delta y
+\end{align*}
+kde $radius$ odpovídá horizontální odchylce $\Delta x$ od středu rotace, vynásobené měřítkem pixelu. Hodnota $\Delta y$ reprezentuje vertikální pozici bodu, která v tomto modelu určuje výškovou souřadnici $z$.
+
+\subsection{Generování 3D modelu a post-processing}
+Výsledné mračno bodů je zpracováno knihovnou \texttt{trimesh}. Pro vytvoření uzavřeného tělesa (manifold mesh) je aplikován algoritmus \textit{Convex Hull}. 
+
+Software v rámci post-processingu podporuje pokročilé booleovské operace (CSG – \textit{\mbox{Constructive} Solid Geometry}). Konkrétně je implementována operace rozdílu (\textit{mesh \mbox{difference}}), která umožňuje automaticky odečíst referenční sken prázdné podložky od skenu s objektem. Tím je dosaženo čistého modelu bez artefaktů konstrukce skeneru. Finální model je následně exportován ve formátu \texttt{.stl} pro další využití.
 \chapter{Uživatelské rozhraní}
 Tato kapitola popisuje způsoby interakce uživatele se skenerem. Zařízení kombinuje \mbox{vzdálenou} správu pomocí webové aplikace pro plnou kontrolu nad procesem a lokální informační displej pro okamžitou diagnostiku stavu.
 
-\section{Webové rozhraní}
-Uživatelské rozhraní je navrženo jako responzivní webová aplikace založená na standardech HTML5 a JavaScriptu. Aplikace (Dashboard) komunikuje asynchronně s~API běžícím na Raspberry Pi 5, což umožňuje plynulé ovládání bez nutnosti obnovování stránky.
-
-% fotka webu
-
-\begin{itemize}
-    \item \textbf{Hlavní ovládací panel:} Obsahuje prvky pro spuštění skenování (\textit{Start}), pozastavení (\textit{Stop}) a nouzové ukončení procesů (\textit{Kill}).
-    \item \textbf{Indikace průběhu:} Dynamický progress bar zobrazuje aktuální stav skenování v procentech na základě dat ze stavového boxu.
-    \item \textbf{Správa skenů:} Sekce pro prohlížení a stahování hotových 3D modelů ve formátu .STL.
-\end{itemize}
-
 \section{Informační displej}
 Pro okamžitou vizuální zpětnou vazbu bez nutnosti kontroly webového rozhraní je zařízení osazeno LCD displejem $16\times2$ znaků s I2C sběrnicí. Displej slouží jako stavový indikátor, který v reálném čase interpretuje data přijímaná z hlavní řídicí aplikace.
-
 \subsection{Logika zobrazení a stavový automat}
 Program obsluhující displej pracuje jako stavový automat, který přijímá data ve formátu JSON. Struktura vstupních dat definuje aktuální stav zařízení, procentuální průběh skenování a případné chybové hlášky.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{img/displej_diagram.png}
+    \includegraphics[width=0.75\textwidth]{img/displej_diagram.png}
     \caption{Diagram stavové logiky informačního displeje}
     \label{fig:displej_diagram}
 \end{figure}
@@ -412,6 +408,19 @@ Mezi definované stavy patří:
     \item \textbf{DONE:} Úspěšné dokončení operace s informací o uloženém souboru.
     \item \textbf{ERROR:} V případě selhání (např. ztráta spojení s kamerou) se vypíše stručná chybová hláška.
 \end{itemize}
+
+\section{Webové rozhraní}
+Uživatelské rozhraní je navrženo jako responzivní webová aplikace založená na standardech HTML5 a JavaScriptu. Aplikace (Dashboard) komunikuje asynchronně s~API běžícím na Raspberry Pi 5, což umožňuje plynulé ovládání bez nutnosti obnovování stránky.
+
+% fotka webu
+
+\begin{itemize}
+    \item \textbf{Hlavní ovládací panel:} Obsahuje prvky pro spuštění skenování (\textit{Start}), pozastavení (\textit{Stop}) a nouzové ukončení procesů (\textit{Kill}).
+    \item \textbf{Indikace průběhu:} Dynamický progress bar zobrazuje aktuální stav skenování v procentech na základě dat ze stavového boxu.
+    \item \textbf{Správa skenů:} Sekce pro prohlížení a stahování hotových 3D modelů ve formátu .STL.
+\end{itemize}
+
+
 
 Po dokončení úlohy nebo odstranění chyby se systém automaticky vrací do stavu čekání na nová data.
 \chapter{Závěr a zhodnocení}
