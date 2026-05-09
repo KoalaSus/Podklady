@@ -387,15 +387,16 @@ Výsledné mračno bodů je zpracováno knihovnou \texttt{trimesh}. Pro vytvoře
 Software v rámci post-processingu podporuje pokročilé booleovské operace (CSG – \textit{\mbox{Constructive} Solid Geometry}). Konkrétně je implementována operace rozdílu (\textit{mesh \mbox{difference}}), která umožňuje automaticky odečíst referenční sken prázdné podložky od skenu s objektem. Tím je dosaženo čistého modelu bez artefaktů konstrukce skeneru. Finální model je následně exportován ve formátu \texttt{.stl} pro další využití.
 \chapter{Uživatelské rozhraní}
 Tato kapitola popisuje způsoby interakce uživatele se skenerem. Zařízení kombinuje \mbox{vzdálenou} správu pomocí webové aplikace pro plnou kontrolu nad procesem a lokální informační displej pro okamžitou diagnostiku stavu.
-
+\vspace*{-0.1cm}
 \section{Informační displej}
 Pro okamžitou vizuální zpětnou vazbu bez nutnosti kontroly webového rozhraní je zařízení osazeno LCD displejem $16\times2$ znaků s I2C sběrnicí. Displej slouží jako stavový indikátor, který v reálném čase interpretuje data přijímaná z hlavní řídicí aplikace.
+\vspace*{-0.1cm}
 \subsection{Logika zobrazení a stavový automat}
 Program obsluhující displej pracuje jako stavový automat, který přijímá data ve formátu JSON. Struktura vstupních dat definuje aktuální stav zařízení, procentuální průběh skenování a případné chybové hlášky.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{img/displej_diagram.png}
+    \includegraphics[width=0.9\textwidth]{img/displej_diagram.png}
     \caption{Diagram stavové logiky informačního displeje}
     \label{fig:displej_diagram}
 \end{figure}
