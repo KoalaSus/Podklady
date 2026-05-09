@@ -331,6 +331,39 @@ Restart=always
 User=appuser
 \end{lstlisting}
 \clearpage
+\section{API a síťová komunikace}
+Software skeneru je navržen jako distribuovaný systém tří služeb, které spolu komunikují pomocí HTTP požadavků. Tato architektura umožňuje striktní oddělení uživatelského rozhraní od kritické logiky ovládání hardwaru a zajišťuje stabilitu systému i při vysokém zatížení procesoru během rekonstrukce.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|c|p{8cm}|}
+        \hline
+        \textbf{Služba} & \textbf{Port} & \textbf{Význam a funkce} \\ \hline
+        \texttt{skener\_sluzba} & 5000 & \textbf{Control API}: Přijímá příkazy pro fyzické akce (start, stop, kill). Přímo ovládá GPIO piny a logiku skenování. \\ \hline
+        \texttt{skener\_sluzba} & 5001 & \textbf{State API}: Udržuje a poskytuje aktuální stavový JSON (procento průběhu, aktuální stav systému). \\ \hline
+        \texttt{skener\_web} & 5002 & \textbf{Frontend}: Webový server postavený na \mbox{frameworku} Flask, který vykresluje \mbox{Dashboard} na základě dat ze State API. \\ \hline
+    \end{tabular}
+    \caption{Rozdělení síťového provozu mezi systémové služby}
+\end{table}
+
+\subsection{Definice API endpointů}
+Pro ovládání skeneru z webového rozhraní jsou využívány asynchronní požadavky na službu běžící na portu 5000. Komunikace probíhá prostřednictvím následujících endpointů:
+
+\begin{itemize}
+    \item \texttt{GET /start}: Inicializuje třídu \texttt{Skener}, nastaví limity a spustí asynchronní pracovní vlákno pro fyzický pohyb motoru a snímání obrazu.
+    \item \texttt{GET /stop}: Slouží jako přepínač pro událost \texttt{pause\_event}. Umožňuje uživateli skenování kdykoliv pozastavit a opětovně spustit bez ztráty aktuální pozice.
+    \item \texttt{GET /kill}: Okamžitě ukončí aktivní vlákno a nastaví systém do výchozího stavu „neskenuje“.
+\end{itemize}
+
+\subsection{Zabezpečení síťového provozu}
+Vzhledem k otevřené architektuře je bezpečnost zajištěna pomocí firewallu UFW, jak je definováno v instalačním skriptu \texttt{install.sh}. Pro bezproblémový chod jsou povoleny pouze tyto protokoly:
+\begin{itemize}
+    \item \textbf{TCP 22}: Vzdálená správa přes SSH.
+    \item \textbf{TCP 5002}: Přístup uživatele k webovému dashboardu.
+    \item \textbf{TCP 5000--5001}: Interní komunikace mezi službami.
+\end{itemize}
+Všechny ostatní příchozí porty jsou striktně blokovány, čímž je minimalizováno riziko neautorizovaného zásahu do probíhajícího měření.
+
 \section{Simulace a generování testovacích dat}
 Vzhledem k paralelnímu vývoji hardwaru a softwaru byla vytvořena virtuální simulace skeneru v prostředí Blender. Tento přístup umožnil vývoj algoritmů pro zpracování obrazu nezávisle na fyzické kompletaci zařízení.
 
@@ -387,29 +420,6 @@ Výsledné mračno bodů je zpracováno knihovnou \texttt{trimesh}. Pro vytvoře
 Software v rámci post-processingu podporuje pokročilé booleovské operace (CSG – \textit{\mbox{Constructive} Solid Geometry}). Konkrétně je implementována operace rozdílu (\textit{mesh \mbox{difference}}), která umožňuje automaticky odečíst referenční sken prázdné podložky od skenu s objektem. Tím je dosaženo čistého modelu bez artefaktů konstrukce skeneru. Finální model je následně exportován ve formátu \texttt{.stl} pro další využití.
 \chapter{Uživatelské rozhraní}
 Tato kapitola popisuje způsoby interakce uživatele se skenerem. Zařízení kombinuje \mbox{vzdálenou} správu pomocí webové aplikace pro plnou kontrolu nad procesem a lokální informační displej pro okamžitou diagnostiku stavu.
-\vspace*{-0.1cm}
-\section{Informační displej}
-Pro okamžitou vizuální zpětnou vazbu bez nutnosti kontroly webového rozhraní je zařízení osazeno LCD displejem $16\times2$ znaků s I2C sběrnicí. Displej slouží jako stavový indikátor, který v reálném čase interpretuje data přijímaná z hlavní řídicí aplikace.
-\vspace*{-0.1cm}
-\subsection{Logika zobrazení a stavový automat}
-Program obsluhující displej pracuje jako stavový automat, který přijímá data ve formátu JSON. Struktura vstupních dat definuje aktuální stav zařízení, procentuální průběh skenování a případné chybové hlášky.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.9\textwidth]{img/displej_diagram.png}
-    \caption{Diagram stavové logiky informačního displeje}
-    \label{fig:displej_diagram}
-\end{figure}
-
-Mezi definované stavy patří:
-\begin{itemize}
-    \item \textbf{READY:} Systém je připraven, na displeji svítí text „Připraveno na sken“.
-    \item \textbf{SCAN:} Probíhá aktivní snímání. Horní řádek zobrazuje „Skenování“, spodní pak numerický progress bar.
-    \item \textbf{PAUSED:} Skenování bylo uživatelem pozastaveno.
-    \item \textbf{DONE:} Úspěšné dokončení operace s informací o uloženém souboru.
-    \item \textbf{ERROR:} V případě selhání (např. ztráta spojení s kamerou) se vypíše stručná chybová hláška.
-\end{itemize}
-
 \section{Webové rozhraní}
 Uživatelské rozhraní je navrženo jako responzivní webová aplikace založená na standardech HTML5 a JavaScriptu. Aplikace (Dashboard) komunikuje asynchronně s~API běžícím na Raspberry Pi 5, což umožňuje plynulé ovládání bez nutnosti obnovování stránky.
 
@@ -420,8 +430,18 @@ Uživatelské rozhraní je navrženo jako responzivní webová aplikace založen
     \item \textbf{Indikace průběhu:} Dynamický progress bar zobrazuje aktuální stav skenování v procentech na základě dat ze stavového boxu.
     \item \textbf{Správa skenů:} Sekce pro prohlížení a stahování hotových 3D modelů ve formátu .STL.
 \end{itemize}
+\clearpage
+\section{Informační displej}
+Pro rychlou kontrolu stavu zařízení bez nutnosti přístupu k webovému rozhraní je \mbox{skener} \mbox{vybaven} LCD displejem (připojeným přes sběrnici I2C). Displej slouží jako informační terminál, který v reálném čase vizualizuje data ze stavového API.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{img/displej_diagram.png}
+    \caption{Diagram stavové logiky informačního displeje}
+    \label{fig:displej_diagram}
+\end{figure}
 
+Obsluha displeje je integrována přímo v rámci služby \texttt{skener.service}. Systém \mbox{periodicky} kontroluje aktuální stav (\textit{State API}) a vypisuje odpovídající hlášení (např. probíhající sken, procentuální progress bar nebo chybové kódy). Toto řešení zajišťuje základní zpětnou vazbu i v případě výpadku síťového spojení s klientským zařízením.
 
 Po dokončení úlohy nebo odstranění chyby se systém automaticky vrací do stavu čekání na nová data.
 \chapter{Závěr a zhodnocení}
