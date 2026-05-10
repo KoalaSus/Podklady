@@ -76,7 +76,9 @@
 \end{titlepage}
 
 \setcounter{page}{2}
+
 \tableofcontents
+\vspace*{-0.5cm}
 \clearpage
 
 \chapter{Specifikace projektu}
@@ -99,13 +101,13 @@ Jádrem systému je mikropočítač Raspberry Pi 5, který zajišťuje koordinac
         Metoda snímání & Laserová triangulace \\ \hline
         Snímací hardware & 2$\times$ Pi kamera, 2$\times$ Liniový laser \\ \hline
         Rozsah rotace & 360° (krokový motor) \\ \hline
-        Náklady & $\approx$ 1\,800~Kč \\ \hline
+        Odhadované náklady & $\approx$ 4\,500 -- 5\,000~Kč \\ \hline
     \end{tabular}
     \caption{Základní technická specifikace skeneru}
 \end{table}
 
 \section{Konstrukční cíle}
-Důraz je kladen na uzavřené provedení konstrukce, které eliminuje externí světelný šum a zajišťuje mechanickou stabilitu všech měřicích komponent vůči ose rotace.
+Důraz je kladen na uzavřené provedení konstrukce, které eliminuje externí světelný šum \mbox{a zajišťuje} mechanickou stabilitu všech měřicích komponent vůči ose rotace.
 
 \chapter{Princip 3D skenování}
 Základním principem fungování tohoto zařízení je metoda laserové triangulace. Tato \mbox{technika} využívá známé geometrické vztahy mezi zdrojem světla, snímačem a měřeným objektem k určení přesných souřadnic bodů v trojrozměrném prostoru.
@@ -198,7 +200,7 @@ Důležitou součástí jsou také krytky s vývody pro kabeláž, které slouž
 \end{figure}
 \FloatBarrier
 \section{Seznam komponent}
-Skladba komponent byla zvolena s ohledem na dosažení nízkonákladového řešení ($\approx$~1\,800\,Kč) při zachování vysoké přesnosti měření.
+Skladba komponent byla zvolena s ohledem na dosažení nízkonákladového řešení při zachování vysoké přesnosti měření.
 
 \begin{itemize}
     \item \textbf{Řídicí jednotka:} Raspberry Pi 5
@@ -234,7 +236,7 @@ Propojení všech elektronických komponent je realizováno prostřednictvím ne
 \end{figure}
 \clearpage
 \subsection{Detailní zapojení komponent}
-Následující tabulky specifikují propojení jednotlivých prvků s~řídicí jednotkou Raspberry Pi 5 a externím napájením.
+Následující tabulky specifikují propojení jednotlivých prvků s~řídicí jednotkou \mbox{Raspberry Pi 5} a externím napájením.
 
 \begin{table}[H]
     \centering
@@ -430,7 +432,7 @@ Pro rychlou kontrolu stavu zařízení bez nutnosti přístupu k webovému rozhr
     \label{fig:displej_diagram}
 \end{figure}
 
-Obsluha displeje je integrována přímo v rámci služby \texttt{skener.service}. Systém \mbox{periodicky} kontroluje aktuální stav (\textit{State API}) a vypisuje odpovídající hlášení (např. probíhající sken, procentuální progress bar nebo chybové kódy). Toto řešení zajišťuje základní zpětnou vazbu i v případě výpadku síťového spojení s klientským zařízením.
+Obsluha displeje je integrována přímo v rámci služby \texttt{skener.service}. Systémem je periodicky kontrolován aktuální stav (\textit{State API}) a vypisováno odpovídající hlášení (např. probíhající sken). Toto řešení zajišťuje základní zpětnou vazbu i v případě výpadku síťového spojení s klientským zařízením.
 
 Po dokončení úlohy nebo odstranění chyby se systém automaticky vrací do stavu čekání na nová data.
 \clearpage
@@ -463,6 +465,13 @@ Uživatelské rozhraní je navrženo jako responzivní webová aplikace založen
 \end{itemize}
 
 \chapter{Závěr a zhodnocení}
+Cílem tohoto projektu byl návrh a realizace cenově dostupného 3D laserového skeneru postaveného na platformě Raspberry Pi 5. Během vývoje se podařilo úspěšně integrovat hardwarové komponenty, jako jsou liniové lasery, Pi kamery a krokový motor, do stabilního celku v rámci uzavřené konstrukce.
+
+\section{Dosažené výsledky}
+V rámci softwarové části byla implementována distribuovaná architektura tří služeb (Control API, State API a Frontend), která zajišťuje vysokou stabilitu systému. Vyvinutý algoritmus pro zpracování obrazu v barevném prostoru HSV s využitím sub-pixelové přesnosti umožňuje generovat mračna bodů s minimálním šumem. Finálním výstupem je polygonální síť ve formátu .STL, kterou lze přímo využít pro další zpracování nebo 3D tisk.
+
+\section{Ekonomické zhodnocení}
+Celková hodnota osazeného hardwaru (včetně zapůjčeného Raspberry Pi 5) odpovídá částce 4\,500 -- 5\,000 Kč, což je uvedeno v technické specifikaci jako odhadovaná cena zařízení. Reálné náklady na pořízení doplňkových komponent však byly díky zapůjčení klíčových prvků udrženy pod hranicí 2\,000 Kč.
 
 \begin{thebibliography}{9}
 \bibitem{instructables} 
