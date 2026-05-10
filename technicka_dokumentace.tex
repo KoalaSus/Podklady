@@ -420,17 +420,6 @@ Výsledné mračno bodů je zpracováno knihovnou \texttt{trimesh}. Pro vytvoře
 Software v rámci post-processingu podporuje pokročilé booleovské operace (CSG – \textit{\mbox{Constructive} Solid Geometry}). Konkrétně je implementována operace rozdílu (\textit{mesh \mbox{difference}}), která umožňuje automaticky odečíst referenční sken prázdné podložky od skenu s objektem. Tím je dosaženo čistého modelu bez artefaktů konstrukce skeneru. Finální model je následně exportován ve formátu \texttt{.stl} pro další využití.
 \chapter{Uživatelské rozhraní}
 Tato kapitola popisuje způsoby interakce uživatele se skenerem. Zařízení kombinuje \mbox{vzdálenou} správu pomocí webové aplikace pro plnou kontrolu nad procesem a lokální informační displej pro okamžitou diagnostiku stavu.
-\section{Webové rozhraní}
-Uživatelské rozhraní je navrženo jako responzivní webová aplikace založená na standardech HTML5 a JavaScriptu. Aplikace (Dashboard) komunikuje asynchronně s~API běžícím na Raspberry Pi 5, což umožňuje plynulé ovládání bez nutnosti obnovování stránky.
-
-% fotka webu
-
-\begin{itemize}
-    \item \textbf{Hlavní ovládací panel:} Obsahuje prvky pro spuštění skenování (\textit{Start}), pozastavení (\textit{Stop}) a nouzové ukončení procesů (\textit{Kill}).
-    \item \textbf{Indikace průběhu:} Dynamický progress bar zobrazuje aktuální stav skenování v procentech na základě dat ze stavového boxu.
-    \item \textbf{Správa skenů:} Sekce pro prohlížení a stahování hotových 3D modelů ve formátu .STL.
-\end{itemize}
-\clearpage
 \section{Informační displej}
 Pro rychlou kontrolu stavu zařízení bez nutnosti přístupu k webovému rozhraní je \mbox{skener} \mbox{vybaven} LCD displejem (připojeným přes sběrnici I2C). Displej slouží jako informační terminál, který v reálném čase vizualizuje data ze stavového API.
 
@@ -444,6 +433,35 @@ Pro rychlou kontrolu stavu zařízení bez nutnosti přístupu k webovému rozhr
 Obsluha displeje je integrována přímo v rámci služby \texttt{skener.service}. Systém \mbox{periodicky} kontroluje aktuální stav (\textit{State API}) a vypisuje odpovídající hlášení (např. probíhající sken, procentuální progress bar nebo chybové kódy). Toto řešení zajišťuje základní zpětnou vazbu i v případě výpadku síťového spojení s klientským zařízením.
 
 Po dokončení úlohy nebo odstranění chyby se systém automaticky vrací do stavu čekání na nová data.
+\clearpage
+\section{Webové rozhraní}
+Uživatelské rozhraní je navrženo jako responzivní webová aplikace založená na standardech HTML5 a JavaScriptu. Aplikace (Dashboard) komunikuje asynchronně s API běžícím na Raspberry Pi 5, což umožňuje plynulé ovládání bez nutnosti obnovování stránky.
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.75\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{img/web_dashboard.png}
+        \caption{Hlavní ovládací panel v průběhu skenování}
+    \end{subfigure}
+    
+    \vspace{1.5em}
+    
+    \begin{subfigure}[b]{0.75\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{img/web_skeny.png}
+        \caption{Záložka „Skeny“ se seznamem hotových modelů a 3D náhledem}
+    \end{subfigure}
+    
+    \caption{Uživatelské rozhraní systému (Dashboard)}
+    \label{fig:web_rozhrani}
+\end{figure}
+
+\begin{itemize}
+    \item \textbf{Hlavní ovládací panel:} Obsahuje prvky pro spuštění skenování (\textit{Start}), pozastavení (\textit{Stop}) a nouzové ukončení procesů (\textit{Kill}).
+    \item \textbf{Indikace průběhu:} Dynamický progress bar zobrazuje aktuální stav skenování v procentech na základě dat ze stavového boxu.
+    \item \textbf{Správa skenů:} Sekce pro prohlížení a stahování hotových 3D modelů ve formátu .STL.
+\end{itemize}
+
 \chapter{Závěr a zhodnocení}
 
 \begin{thebibliography}{9}
